@@ -24,4 +24,33 @@
   // null : 비었다
   let person: null; // 💩
   let person2: string | null;
+
+  // unkwown (겸손 모드: 가능하면 쓰지말자 💩)
+  let notSure: unknown = 0;
+  notSure = 'he';
+  notSure = true;
+
+  // any (당당 모드: 가능하면 쓰지말자 💩)
+  let anything: unknown = 0;
+  anything = 'he';
+  anything = true;
+
+  // void
+  function print(): void {
+    console.log('hello');
+    return;
+  }
+  let unusable: void = undefined; // 💩
+
+  // never
+  function throwError(message: string): never {
+    // message -> server (log)
+    throw new Error(message);
+  }
+  let neverEnding: never; // 💩
+
+  // object
+  let obj: object; // 💩
+  function acceptSomeObject(obj: object) {}
+  acceptSomeObject({ name: 'ellie' });
 }
