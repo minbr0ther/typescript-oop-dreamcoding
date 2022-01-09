@@ -8,7 +8,13 @@
     makeCoffee(shots: number): CoffeeCup;
   }
 
-  class CoffeeMachine implements CoffeeMaker {
+  interface CommercialCoffeeMaker {
+    makeCoffee(shots: number): CoffeeCup;
+    fillCoffeeBeans(beans: number): void;
+    clean(): void;
+  }
+
+  class CoffeeMachine implements CoffeeMaker, CommercialCoffeeMaker {
     private static BEANS_GRAM_PER_SHOT: number = 7; // private 외부에서 변경 못함
     private coffeeBeans: number = 0; // instance (object) level
 
@@ -27,6 +33,10 @@
         throw new Error('value for beans should be greater than zero');
       }
       this.coffeeBeans += beans;
+    }
+
+    clean() {
+      console.log('cleaning the machine... ✨');
     }
 
     private grindBeans(shots: number) {
@@ -58,7 +68,26 @@
     }
   }
 
-  const maker = CoffeeMachine.makeMachine(32); // constructor를 private로 만들어서 new 사용 불가능
-  maker.fillCoffeeBeans(32);
-  maker.makeCoffee(2);
+  class AmateurUser {
+    constructor(private machine: CoffeeMaker) {}
+    makeCoffee() {
+      const coffee = this.machine.makeCoffee(2);
+      console.log(coffee);
+    }
+  }
+
+  class ProBarista {
+    constructor(private machine: CommercialCoffeeMaker) {}
+    makeCoffee() {
+      const coffee = this.machine.makeCoffee(2);
+      console.log(coffee);
+      this.machine.fillCoffeeBeans(45);
+      this.machine.clean();
+    }
+  }
+
+  const maker: CoffeeMachine = CoffeeMachine.makeMachine(32); // constructor를 private로 만들어서 new 사용 불가능
+  const amateur = new AmateurUser(maker);
+  const pro = new ProBarista(maker);
+  pro.makeCoffee();
 }
