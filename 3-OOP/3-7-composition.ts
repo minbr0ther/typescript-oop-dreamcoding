@@ -9,17 +9,18 @@
     makeCoffee(shots: number): CoffeeCup;
   }
 
+  // 인터페이스와 커피머신만 있으면 모든 기능들을 사용할 수 있다
   class CoffeeMachine implements CoffeeMaker {
     private static BEANS_GRAM_PER_SHOT: number = 7; // private 외부에서 변경 못함
     private coffeeBeans: number = 0; // instance (object) level
 
-    constructor(coffeeBeans: number) {
+    // 전달받은 milkFrother, SugarProvider로 커피를 만든다
+    constructor(
+      coffeeBeans: number,
+      private milk: milkFrother,
+      private sugar: SugarProvider
+    ) {
       this.coffeeBeans = coffeeBeans;
-    }
-
-    // 외부에서도 클래스를 만들지 않고 사용 가능
-    static makeMachine(coffeeBeans: number): CoffeeMachine {
-      return new CoffeeMachine(coffeeBeans);
     }
 
     fillCoffeeBeans(beans: number) {
@@ -59,12 +60,24 @@
       this.grindBeans(shots);
       this.preHeat();
 
-      return this.extract(shots);
+      // 새로 추가된 부분
+      const coffee = this.extract(shots);
+      const sugarAdded = this.sugar.addSugar(coffee);
+
+      return this.milk.makeMilk(sugarAdded);
     }
   }
 
-  // 싸구려 우유 거품기
-  class CheapMilkSteamer {
+  //새로 추가된 부분
+  interface milkFrother {
+    makeMilk(cup: CoffeeCup): CoffeeCup;
+  }
+
+  interface SugarProvider {
+    addSugar(cup: CoffeeCup): CoffeeCup;
+  }
+
+  class CheapMilkSteamer implements milkFrother {
     private steamMilk(): void {
       console.log('Steaming some milk... 🥛');
     }
@@ -78,8 +91,44 @@
     }
   }
 
-  // 설탕 제조기
-  class AutomaticSugarMixer {
+  // 정말 정말 좋은 우유 거품기
+  class FancyMilkSteamer implements milkFrother {
+    private steamMilk(): void {
+      console.log('Fancyyyyy Steaming some milk... 🥛');
+    }
+
+    makeMilk(cup: CoffeeCup): CoffeeCup {
+      this.steamMilk();
+      return {
+        ...cup,
+        hasMilk: true,
+      };
+    }
+  }
+
+  // 최고급 기술로 차가운 우유 거품기
+  class ColdMilkSteamer implements milkFrother {
+    private steamMilk(): void {
+      console.log('Fancyyyyy Steaming some milk... 🥛');
+    }
+
+    makeMilk(cup: CoffeeCup): CoffeeCup {
+      this.steamMilk();
+      return {
+        ...cup,
+        hasMilk: true,
+      };
+    }
+  }
+
+  // 우유를 사용하지 않는 거품기 -> 아무것도 하지 않음
+  class NoMilk implements milkFrother {
+    makeMilk(cup: CoffeeCup): CoffeeCup {
+      return cup;
+    }
+  }
+
+  class CandySugarMixer implements SugarProvider {
     private getSugar() {
       console.log('Getting some sugar from candy 🍭');
 
@@ -95,58 +144,27 @@
     }
   }
 
-  class CaffeLatteMachine extends CoffeeMachine {
-    // 자식클래스에서 다시 생성자 생성
-    constructor(
-      beans: number,
-      public readonly serialNumber: string,
-      private milkFrother: CheapMilkSteamer
-    ) {
-      // 부모생성자에는 coffeeBeans:number 를 전달해야함
-      super(beans);
+  // 사탕으로 만든 설탕이 아니라 진짜 슈가 믹서
+  class SugarMixer implements SugarProvider {
+    private getSugar() {
+      console.log('Getting some sugar from jar!!!!!!');
+
+      return true;
     }
 
-    private steamMilk(): void {
-      console.log('Steaming some milk... 🥛');
-    }
-
-    makeCoffee(shots: number): CoffeeCup {
-      const coffee = super.makeCoffee(shots); // 부모의 가열 및 등등 메소드
-
-      return this.milkFrother.makeMilk(coffee);
-      //   this.steamMilk();
-      //   return {
-      //     ...coffee,
-      //     hasMilk: true,
-      //   };
+    addSugar(cup: CoffeeCup): CoffeeCup {
+      const sugar = this.getSugar();
+      return {
+        ...cup,
+        hasSugar: sugar,
+      };
     }
   }
 
-  class SweetCoffeeMaker extends CoffeeMachine {
-    constructor(private beans: number, private sugar: AutomaticSugarMixer) {
-      super(beans);
-    }
-
-    makeCoffee(shots: number): CoffeeCup {
-      const coffee = super.makeCoffee(shots);
-
-      return this.sugar.addSugar(coffee);
-    }
-  }
-
-  class SweetCaffeLatteMachine extends CoffeeMachine {
-    constructor(
-      private beans: number,
-      private milk: CheapMilkSteamer,
-      private sugar: AutomaticSugarMixer
-    ) {
-      super(beans);
-    }
-
-    makeCoffee(shots: number): CoffeeCup {
-      const coffee = super.makeCoffee(shots);
-
-      return this.milk.makeMilk(this.sugar.addSugar(coffee));
+  // 설탕을 사용하지 않는 슈가 믹서
+  class NoSugar implements SugarProvider {
+    addSugar(cup: CoffeeCup): CoffeeCup {
+      return cup;
     }
   }
 
@@ -165,4 +183,24 @@
     console.log('--------------------------');
     machine.makeCoffee(1);
   });
+
+  // Milk
+  const cheapMilkMaker = new CheapMilkSteamer();
+  const fancyMilkMaker = new FancyMilkSteamer();
+  const coldMilkMaker = new ColdMilkSteamer();
+  const noMilk = new NoMilk();
+
+  // Sugar
+  const candySugar = new CandySugarMixer();
+  const sugar = new SugarMixer();
+  const noSugar = new NoSugar();
+
+  // 위의 기계들을 사용하여 조금더 원하는 기능들을 조립해서
+  // 내가 어떤 커피 기계를 만들 건지를 결정할 수 있다
+  const sweetCandyMachine = new CoffeeMachine(12, noMilk, candySugar);
+  const sweetMachine = new CoffeeMachine(12, noMilk, sugar);
+
+  const latteMachine = new CoffeeMachine(12, cheapMilkMaker, noSugar);
+  const coldLatteMachine = new CoffeeMachine(12, coldMilkMaker, noSugar);
+  const sweetLatteMachine = new CoffeeMachine(12, cheapMilkMaker, candySugar);
 }
