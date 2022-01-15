@@ -38,4 +38,18 @@ bob.workPartTime();
 
 // Employee -> FullTimeEmployee (Type Casting: 근데 잘 안씀 💩)
 const ellieAfterPay = pay(ellie); //as FullTimeEmployee;
-const bobAfterfPay = pay(bob);
+const bobAfterPay = pay(bob);
+
+const obj = {
+  name: 'ellie',
+  age: 20,
+};
+
+// keyof: 그 오브젝트 안에 들어있는 키의 타입
+// K는 무조건 오브젝트 T안에 있는 key 값만 가능하다 🚨
+function getValue<T, K extends keyof T>(obj: T, key: K): T[K] {
+  return obj[key];
+}
+
+console.log(getValue(obj, 'name')); // ellie
+console.log(getValue(obj, 'age')); // 20
