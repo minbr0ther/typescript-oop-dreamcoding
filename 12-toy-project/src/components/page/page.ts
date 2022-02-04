@@ -12,11 +12,14 @@ type OnCloseListener = () => void;
 
 type SectionContainerConstructor = {
   // 전달 받는게 없는 생성자, SectionContainer를 만드는 어떤 클래스라도 괜찮다
+  // 생성자를 정의하는 타입
   new (): SectionContainer;
 };
 
 // Component, Composable을 상속하는 새로운 규격
+// 노트, 이미지, 영상 같은 모든 컴포넌트는 무조건 Component, Composable를 구현해야한다
 interface SectionContainer extends Component, Composable {
+  // 무조건 setOnCloseListener API가 있어야 한다
   setOnCloseListener(listener: OnCloseListener): void;
 }
 
@@ -59,11 +62,13 @@ export class PageComponent
   extends BaseComponent<HTMLUListElement>
   implements Composable
 {
+  // 어떤 타입의 데이터를 만들 수 있는지 전달한다
   constructor(private pageItemConstructor: SectionContainerConstructor) {
     super('<ul class="page"></ul>');
   }
 
   addChild(section: Component) {
+    // 외부에서 전달된 pageItemConstructor를 통해서 만든다
     const item = new this.pageItemConstructor();
     item.addChild(section);
     item.attachTo(this.element, "beforeend");
