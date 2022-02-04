@@ -7,17 +7,29 @@ export interface Composable {
   addChild(child: Component): void;
 }
 
+// 아무런 인자도 전달받지 않고 아무런 반환이 없다
+type OnCloseListener = () => void;
+
 class PageItemComponent
   extends BaseComponent<HTMLElement>
   implements Composable
 {
+  // 외부로부터 받은 콜백함수 저장 (전달이 없을 수 도 있어서 optional)
+  private closeListener?: OnCloseListener;
+
   constructor() {
     super(`<li class="page-item">
         <section class="page-item__body"></section>
         <div class="page-item__controls">
-          <button class="close">X</button>
+          <button class="close">&times;</button>
         </div>
       </li>`);
+
+    const closeBtn = this.element.querySelector(".close")! as HTMLButtonElement;
+    closeBtn.onclick = () => {
+      // 전달받은 콜백함수를 호출한다
+      this.closeListener && this.closeListener();
+    };
   }
 
   addChild(child: Component) {
@@ -26,6 +38,10 @@ class PageItemComponent
     )! as HTMLElement;
 
     child.attachTo(container);
+  }
+
+  setOnCloseListener(listener: OnCloseListener) {
+    this.closeListener = listener;
   }
 }
 
@@ -41,5 +57,8 @@ export class PageComponent
     const item = new PageItemComponent();
     item.addChild(section);
     item.attachTo(this.element, "beforeend");
+    item.setOnCloseListener(() => {
+      item.removeFrom(this.element);
+    });
   }
 }
