@@ -1,11 +1,12 @@
 import { TodoComponent } from "./components/page/item/todo.js";
 import { NoteComponent } from "./components/page/item/note.js";
 import { ImageComponent } from "./components/page/item/image.js";
-import { PageComponent } from "./components/page/page.js";
+import { PageComponent, PageItemComponent, } from "./components/page/page.js";
 import { VideoComponent } from "./components/page/item/video.js";
 class App {
     constructor(appRoot) {
-        this.page = new PageComponent();
+        // PageComponent가 만들 수 있는 컴포넌트는 PageItemComponent이다
+        this.page = new PageComponent(PageItemComponent);
         this.page.attachTo(appRoot);
         const image = new ImageComponent("Image Title", "https://picsum.photos/600/300");
         this.page.addChild(image);

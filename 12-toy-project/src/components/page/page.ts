@@ -10,9 +10,19 @@ export interface Composable {
 // 아무런 인자도 전달받지 않고 아무런 반환이 없다
 type OnCloseListener = () => void;
 
-class PageItemComponent
+type SectionContainerConstructor = {
+  // 전달 받는게 없는 생성자, SectionContainer를 만드는 어떤 클래스라도 괜찮다
+  new (): SectionContainer;
+};
+
+// Component, Composable을 상속하는 새로운 규격
+interface SectionContainer extends Component, Composable {
+  setOnCloseListener(listener: OnCloseListener): void;
+}
+
+export class PageItemComponent
   extends BaseComponent<HTMLElement>
-  implements Composable
+  implements SectionContainer
 {
   // 외부로부터 받은 콜백함수 저장 (전달이 없을 수 도 있어서 optional)
   private closeListener?: OnCloseListener;
@@ -49,12 +59,12 @@ export class PageComponent
   extends BaseComponent<HTMLUListElement>
   implements Composable
 {
-  constructor() {
+  constructor(private pageItemConstructor: SectionContainerConstructor) {
     super('<ul class="page"></ul>');
   }
 
   addChild(section: Component) {
-    const item = new PageItemComponent();
+    const item = new this.pageItemConstructor();
     item.addChild(section);
     item.attachTo(this.element, "beforeend");
     item.setOnCloseListener(() => {

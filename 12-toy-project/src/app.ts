@@ -2,7 +2,11 @@ import { Component } from "./components/component.js";
 import { TodoComponent } from "./components/page/item/todo.js";
 import { NoteComponent } from "./components/page/item/note.js";
 import { ImageComponent } from "./components/page/item/image.js";
-import { Composable, PageComponent } from "./components/page/page.js";
+import {
+  Composable,
+  PageComponent,
+  PageItemComponent,
+} from "./components/page/page.js";
 import { VideoComponent } from "./components/page/item/video.js";
 
 class App {
@@ -10,7 +14,8 @@ class App {
   private readonly page: Component & Composable;
 
   constructor(appRoot: HTMLElement) {
-    this.page = new PageComponent();
+    // PageComponent가 만들 수 있는 컴포넌트는 PageItemComponent이다
+    this.page = new PageComponent(PageItemComponent);
     this.page.attachTo(appRoot);
 
     const image = new ImageComponent(
